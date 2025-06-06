@@ -14,7 +14,7 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/pro/:id" element={<Profile />} />
         <Route path="/forgotPassword" element={<ForgotePassword />} />
-        <Route path="/updateProfile" element={<UpdateProfile />} />
+        <Route path="/updateProfile/:id" element={<UpdateProfile />} />
       </Routes>
     </BrowserRouter>
   );

@@ -58,8 +58,10 @@ const useUserStore = create((set, get) => ({
     },
 
     fetchUserByID: async (id) => {
+        console.log('id : ', id);
         try {
             const userDetails = await axios.post(`http://localhost:2100/api/users/getUserByID/${id}`);
+            console.log(userDetails);
             set({ user: userDetails.data.user });
         } catch (error) {
             console.log(error);
@@ -71,6 +73,7 @@ const useUserStore = create((set, get) => ({
         try {
             const response = await axios.put(`http://localhost:2100/api/users/updateProfileImage/${get().user._id}`, { profilePicture: image });
             set({ user: response.data.user });
+            toast.success(response.data.message);
         } catch (error) {
             console.log(error);
             toast.error(error.response.data.message);

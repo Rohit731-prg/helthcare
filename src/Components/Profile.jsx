@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import useUserStore from "../store/userStore";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaEdit } from "react-icons/fa";
+import { useStore } from "zustand";
 
 function Profile() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ function Profile() {
   const transactions = useUserStore((state) => state.transactions);
 
   useEffect(() => {
+    useUserStore.getState().fetchUserByID(id);
     useUserStore.getState().transactionsById(id);
   }, [id]);
 
@@ -39,7 +41,7 @@ function Profile() {
               <div className="self-start md:self-center">
                 <button
                   className="p-3 bg-yellow-400 hover:bg-yellow-300 text-black rounded-full shadow-md transition"
-                  onClick={() => navigate("/updateProfile")}
+                  onClick={() => navigate(`/updateProfile/${id}`)}
                   title="Edit Profile"
                 >
                   <FaEdit size={20} />

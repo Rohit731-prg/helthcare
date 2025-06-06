@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import useUserStore from "../store/userStore";
 import { RiImageEditFill } from "react-icons/ri";
-import { toast } from "react-hot-toast";
+import { Toaster  } from "react-hot-toast";
+import { useParams } from "react-router-dom";
 
 function UpdateProfile() {
+  const { id } = useParams();
   const user = useUserStore((state) => state.user);
 
   const handleImageChange = async (e) => {
@@ -19,6 +21,11 @@ function UpdateProfile() {
       await useUserStore.getState().setUpdatedProfileImage(base64Image);
     };
   };
+
+  useEffect(() => {
+    console.log("Fetching user by ID:", id);
+    useUserStore.getState().fetchUserByID(id);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-100 via-white to-blue-100 flex items-center justify-center px-4 py-10">
@@ -74,9 +81,9 @@ function UpdateProfile() {
               </p>
             </div>
           </div>
+          <Toaster  />
         </div>
       )}
-      <toast />
     </div>
   );
 }
