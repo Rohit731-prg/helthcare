@@ -26,12 +26,11 @@ const useUserStore = create((set, get) => ({
         }
     },
 
-    signup: async (userDetails) => {
+    signup: async (id, userDetails) => {
         console.log(userDetails);
         try {
-            const res = await axios.post('http://localhost:2100/api/users/register', {
+            const res = await axios.put(`http://localhost:2100/api/users/register/${id}`, {
                 name: userDetails.name,
-                phone: userDetails.phone,
                 gender: userDetails.gender,
                 dateOfBirth: userDetails.dateOfBirth,
                 password: userDetails.password,
@@ -39,6 +38,33 @@ const useUserStore = create((set, get) => ({
             });
             
             toast.success(res.data.message);
+            return true;
+        } catch (error) {
+            toast.error(error.response.data.message);
+            console.log(error);
+            return false;
+        }
+    },
+
+    sendOTP: async (phoneNumber) => {
+        try {
+            const res = await axios.post(`http://localhost:2100/api/users/sendOTP`, { phone: phoneNumber });
+            toast.success(res.data.message);
+            set({ user: res.data.User });
+            return res.data.User;
+        } catch (error) {
+            toast.error(error.response.data.message);
+            console.log(error);
+            return false;
+        }
+    },
+
+    verifyOTP: async (id, otp) => {
+        try {
+            const res = await axios.post(`http://localhost:2100/api/users/verifyOTP/${id}`, { OTP: otp });
+            console.log(res);
+            toast.success(res.data.message);
+            set({ user: res.data.User });
             return true;
         } catch (error) {
             toast.error(error.response.data.message);

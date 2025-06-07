@@ -1,9 +1,4 @@
 import React, { useState } from "react";
-import {
-  auth,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-} from "../utils/firebase";
 import toast, { Toaster } from "react-hot-toast";
 import { FaCamera } from "react-icons/fa";
 import useUserStore from "../store/userStore";
@@ -11,14 +6,14 @@ import { useNavigate } from "react-router-dom";
 
 function SignIn() {
   const navigate = useNavigate();
-  const [isOTPVerified, setIsOTPVerified] = useState(true);
+  const [ user, serUser ] = useState(null);
+  const [isOTPVerified, setIsOTPVerified] = useState(false);
   const [isOTPSent, setIsOTPSent] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [otp, setOtp] = useState("");
   const [confirmObj, setConfirmObj] = useState(null);
   const [userDetails, setUserDetails] = useState({
     name: "",
-    phone: "+919883587219",
     gender: "",
     dateOfBirth: "",
     password: "",
@@ -26,18 +21,7 @@ function SignIn() {
     profilePicture: null,
   });
 
-  const setupRecaptcha = () => {
-    window.recaptchaVerifier = new RecaptchaVerifier(
-      auth,
-      "recaptcha-container",
-      {
-        size: "invisible",
-        callback: () => console.log("reCAPTCHA Resolved"),
-      }
-    );
-  };
-
-  const otpSent = (e) => {
+  const otpSent = async (e) => {
     e.preventDefault();
 
     if (!phoneNumber.startsWith("+91") || phoneNumber.length < 13) {
@@ -45,34 +29,25 @@ function SignIn() {
       return;
     }
 
-    setupRecaptcha();
-    const appVerifier = window.recaptchaVerifier;
-
-    signInWithPhoneNumber(auth, phoneNumber, appVerifier)
-      .then((confirmationResult) => {
-        setConfirmObj(confirmationResult);
-        toast.success("OTP sent!");
-        setIsOTPSent(true);
-      })
-      .catch((error) => {
-        toast.error("Failed to send OTP");
-        console.error(error);
-      });
+    const res = await useUserStore.getState().sendOTP(phoneNumber);
+    if( res ) {
+      serUser(res);
+      setIsOTPSent(true);
+    }
   };
 
-  const verifyOtp = (e) => {
+  const verifyOtp = async (e) => {
     e.preventDefault();
 
-    confirmObj
-      .confirm(otp)
-      .then(() => {
-        toast.success("Phone verified!");
-        setIsOTPVerified(true);
-      })
-      .catch((error) => {
-        toast.error("Invalid OTP");
-        console.error(error);
-      });
+    if (!otp || otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
+      return;
+    }
+    const res = await useUserStore.getState().verifyOTP(user._id, otp);
+    console.log(res);
+    if (res === true) {
+      setIsOTPVerified(true);
+    }
   };
 
   const compliteProfile = async (e) => {
@@ -83,9 +58,10 @@ function SignIn() {
       return;
     }
 
-    const isLogin = await useUserStore.getState().signup(userDetails);
+    const isLogin = await useUserStore.getState().signup(user._id, userDetails);
     if (isLogin) {
-      navigate("/");
+      toast.success("Profile created successfully!");
+      navigate('/');
     }
   };
 
