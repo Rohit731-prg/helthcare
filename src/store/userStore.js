@@ -104,6 +104,33 @@ const useUserStore = create((set, get) => ({
             console.log(error);
             toast.error(error.response.data.message);
         }
+    },
+
+    forgatePass: async (phoneNumber) => {
+        try {
+            const res = await axios.put('http://localhost:2100/api/users/forgotPassword', {
+                phone: phoneNumber
+            });
+            toast.success(res.data.message);
+            return res.data;
+        } catch (error) {
+            console.log(error);
+            toast.error(error.response.data.message);
+        }
+    },
+
+    verifyOTPForPassword: async (id, otp, password) => {
+        try {
+            const res = await axios.put(`http://localhost:2100/api/users/forgotPasswordOTP/${id}`, {
+                otp: otp,
+                password: password
+            });
+            toast.success(res.data.message);
+            return true;
+        } catch (error) {
+            console.log(error);
+            toast.error(error.response.data.message);
+        }
     }
 }));
 

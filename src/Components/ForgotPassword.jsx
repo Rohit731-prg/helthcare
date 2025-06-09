@@ -1,19 +1,38 @@
 import React, { useState } from "react";
+import toast, { Toaster } from 'react-hot-toast';
+import useUserStore from '../store/userStore';
+import { useNavigate } from "react-router-dom";
 
 function ForgotePassword() {
+  const navigate = useNavigate();
   const [isOTPsent, setIsOTPsent] = useState(false);
   const [ phoneNumber , setPhoneNumber] = useState('');
   const [otp, setOPT] = useState('');
+  const [ password, setPassword ] = useState('');
+  const [ confirmPassword, setConfirmPassword ] = useState('');
+  const [ id, setID ] = useState('');
 
-  const sendOTP = (e) => {
+  const sendOTP = async (e) => {
     e.preventDefault();
-    setIsOTPsent(true);
+
+    if ( !phoneNumber.startsWith("+91") && phoneNumber.length !== 13) return toast.error("Please enter a valid phone number with +91");
+    const res = await useUserStore.getState().forgatePass(phoneNumber);
+
+    if( res !== false ) {
+      setID(res.id);
+      setIsOTPsent(true);
+    }
   };
 
-  const verifyOTP = (e) => {
+  const verifyOTP = async (e) => {
     e.preventDefault();
-    // Add OTP verification logic here
-    alert("OTP Verified!");
+
+    if ( password !== confirmPassword ) return toast.error("Password and Confirm Password doesn't match");
+    
+    const res = await useUserStore.getState().verifyOTPForPassword(id, otp, password);
+    if( res === true ) {
+      navigate('/');
+    }
   };
 
   return (
@@ -32,7 +51,7 @@ function ForgotePassword() {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               type="text"
-              placeholder="e.g. 9876543210"
+              placeholder="e.g. +919876543210"
               className="border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-green-400"
               required
             />
@@ -61,6 +80,28 @@ function ForgotePassword() {
               className="border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
             />
+            <label className="text-sm font-semibold text-gray-700 mb-2">
+              Enter Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter New Password"
+              className="border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            />
+            <label className="text-sm font-semibold text-gray-700 mb-2">
+              Enter Confirm Password
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Enter Confirm Password"
+              className="border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              required
+            />
 
             <button
               type="submit"
@@ -71,6 +112,7 @@ function ForgotePassword() {
           </form>
         )}
       </div>
+      <Toaster />
     </div>
   );
 }
